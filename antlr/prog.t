@@ -1,0 +1,1 @@
+sc.range(1,17).filter(a=>a%2).map(a=>a+3)
