@@ -47,6 +47,6 @@ fragment LETTER     : ([a-z]|[A-Z]|'_');
 fragment DIGIT      : [0-9];
 NUMBER     : DIGIT+;
 IDENTIFIER : LETTER(NUMBER|LETTER)*;
-STRING     : '\"' (NUMBER|LETTER)+ '\"';
+STRING     : '"' (NUMBER|LETTER)+ '"';
 CHAR       : '\'' (NUMBER|LETTER) '\'';
 SYMBOL     : '('|')'|'*'|'&'|'^'|'%'|'$'|'#'|'@'|'!'|'~'|'.'|','|'='|'+'|'-'|'/'|'?'|'<'|'>'|':';
