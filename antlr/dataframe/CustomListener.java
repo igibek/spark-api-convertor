@@ -3,6 +3,8 @@
 package dataframe;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
@@ -21,8 +23,10 @@ public class CustomListener implements DataframeListener {
 	String simpleExpression = "";
 	String complexExpression = "";
 	String pureExpression = "";
+	ArrayList<String> expressions;
 	Map<String, String> map;
-  public String getResult() {
+  
+	public String getResult() {
     return result;
   }
 
@@ -86,23 +90,22 @@ public class CustomListener implements DataframeListener {
 	@Override public void enterUdf(DataframeParser.UdfContext ctx) {
 		simpleExpression = "";
 		map = new HashMap<String, String>();
+		expressions = new ArrayList<String>();
 		// result += ctx.getText();
 		System.out.println("\n> ENTER: " + ctx.getText());
-		// if (ctx.expression().)
 	}
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitUdf(DataframeParser.UdfContext ctx) { 
-		if (isSimpleUdf) {
-			System.out.println("> Exiting simple udf");
-			result +="\"" + simpleExpression + " as _1\"";
-		} else {
-			System.out.println("> Exiting complex udf");
-			result += "\"_1 as _1\", " +  simpleExpression;
+	@Override public void exitUdf(DataframeParser.UdfContext ctx) {
+		for(int i = 0; i < expressions.size(); i++) {
+			Integer tag = i + 1;
+			result += "\"" + expressions.get(i) + " as _" + tag.toString() + "\", ";
 		}
+		result = result.substring(0, result.length()-2);
+		System.out.println("> EXIT UDF");
 	}
 	/**
 	 * {@inheritDoc}
@@ -110,14 +113,14 @@ public class CustomListener implements DataframeListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void enterExpression(DataframeParser.ExpressionContext ctx) { 
-		String start = ctx.getStart().getText();
-		if (start.equals("{")) {
-			System.out.println("> COMPLEX: " + ctx.getText());
-			isSimpleUdf = false;
-		} else {
-			System.out.println("> SIMPLE: " + ctx.getText());
-			isSimpleUdf = true;
-		}
+		// String start = ctx.getStart().getText();
+		// if (start.equals("{")) {
+		// 	System.out.println("> COMPLEX: " + ctx.getText());
+		// 	isSimpleUdf = false;
+		// } else {
+		// 	System.out.println("> SIMPLE: " + ctx.getText());
+		// 	isSimpleUdf = true;
+		// }
 	}
 	/**
 	 * {@inheritDoc}
@@ -146,7 +149,9 @@ public class CustomListener implements DataframeListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTuple_expression(DataframeParser.Tuple_expressionContext ctx) { }
+	@Override public void enterTuple_expression(DataframeParser.Tuple_expressionContext ctx) { 
+		System.out.println("> TUPLE EXPR: " + ctx.pure_expression().size());
+	}
 	/**
 	 * {@inheritDoc}
 	 *
@@ -202,6 +207,9 @@ public class CustomListener implements DataframeListener {
 		// pureExpression = "";
 		// String start = ctx.getText() + " " + ctx.getRuleIndex() + " " + ctx.getAltNumber();
 		// System.out.println(start);
+		if (!(ctx.getParent() instanceof DataframeParser.Pure_expressionContext)) {
+			pureExpression = "";
+		}
 		
 		if (ctx.getStart().getText().equals("if")) {
 			System.out.println("\nif statement");
@@ -213,29 +221,34 @@ public class CustomListener implements DataframeListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitPure_expression(DataframeParser.Pure_expressionContext ctx) {
-		if (ctx.getParent() instanceof DataframeParser.Assign_exprContext) {
-
-		} else {
-			if (ctx.op() != null) {
-				System.out.println("> HAS OPERATION: " + ctx.getText());
-				pureExpression += ctx.op().getText() + transform(ctx.pure_expression(1));
-				if (ctx.pure_expression(0).identity() != null) {
-					pureExpression = transform(ctx.pure_expression(0)) + pureExpression;
-				}
-			} else if(ctx.getStart().getText().equals("if")) {
-				pureExpression = "if(" 
-				  + transform(ctx.comp_expression())
-					+ "," 
-					+ transform(ctx.pure_expression(0)) 
-					+ "," 
-					+ transform(ctx.pure_expression(1)) 
-					+ ")";
-			} else if (ctx.getStart().getText().equals("(")) {
-				pureExpression = "(" + pureExpression + ")";
-			}
-		}
 		
-		// System.out.println("EXIT PURE: " + pureExpression);
+		if (ctx.op() != null) {
+			System.out.println("> HAS OPERATION: " + ctx.getText());
+			pureExpression += ctx.op().getText() + transform(ctx.pure_expression(1));
+			if (ctx.pure_expression(0).identity() != null) {
+				pureExpression = transform(ctx.pure_expression(0)) + pureExpression;
+			}
+		} else if(ctx.getStart().getText().equals("if")) {
+			pureExpression = "if(" 
+				+ transform(ctx.comp_expression())
+				+ "," 
+				+ transform(ctx.pure_expression(0)) 
+				+ "," 
+				+ transform(ctx.pure_expression(1)) 
+				+ ")";
+		} else if (ctx.getStart().getText().equals("(")) {
+			pureExpression = "(" + pureExpression + ")";
+		} else if (ctx.identity() != null && ctx.identity().IDENTIFIER().size() == 1) {
+			System.out.println("> IDENTITY: " + ctx.identity().getText());
+			pureExpression += transform(ctx);
+		} else if (ctx.NUMBER() != null) {
+			pureExpression += transform(ctx);
+		}
+
+		if (ctx.getParent() instanceof DataframeParser.Tuple_expressionContext || ctx.getParent() instanceof DataframeParser.Simple_expressionContext) {
+			System.out.println("> EXIT PURE: " + ctx.getText() + " --> " + pureExpression);
+			expressions.add(pureExpression);
+		}
 	}
 
 	/**
@@ -250,17 +263,17 @@ public class CustomListener implements DataframeListener {
 			DataframeParser.Assign_exprContext parent = (DataframeParser.Assign_exprContext)ctx.getParent();
 			value = transform(parent.pure_expression());
 		} else {
-			if (!map.containsKey(ctx.getText())) {
-				if (ctx.IDENTIFIER().size() > 1) {
-					value = ctx.IDENTIFIER(1).getText();
-				} else {
-					Integer i = map.size()+1;
-					value = "_" + i.toString();
-				}
-			}	
+			if (ctx.IDENTIFIER().size() > 1) {
+				value = ctx.IDENTIFIER(1).getText();
+			} else {
+				Integer i = map.size()+1;
+				value = "_" + i.toString();
+			}
 		}
-		System.out.println("> MAP IDENTIFIER: " + ctx.getText() + " --> " + value);
-		map.put(ctx.getText(), value);
+		if (!map.containsKey(ctx.getText())) {
+			System.out.println("> MAP IDENTIFIER: " + ctx.getText() + " --> " + value);
+			map.put(ctx.getText(), value);
+		}
 	}
 	/**
 	 * {@inheritDoc}
