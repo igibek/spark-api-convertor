@@ -1,12 +1,14 @@
-FILE=./dataframe/test.t
+DIR=./spark/dataframe
+DIR2=./spark/dataset
+FILE=./spark/dataframe/test.t
 API=dataframe
 all:
 	. classpath.sh
-	antlr dataframe/Dataframe.g4
-	javac dataframe/*.java
+	antlr spark/dataframe/Dataframe.g4
+	antlr spark/dataset/Dataset.g4
+	javac spark/**/*.java spark/*.java
 run:
-	java dataframe.App $(FILE) $(API)
+	java spark.App $(FILE) $(API)
 clean:
-	cd dataframe/ && rm -r Dataframe*.java *.class Dataframe*.interp Dataframe*.tokens .antlr/ *_dataframe *_dataset
-clean2:
-	cd dataset/ && rm -r Dataframe*.java *.class Dataframe*.interp Dataframe*.tokens .antlr/
+	rm $(DIR)/Dataframe*.java $(DIR)/*.class $(DIR)/*.interp $(DIR)/*.tokens
+	rm $(DIR2)/Dataset*.java $(DIR2)/*.class $(DIR2)/*.interp $(DIR2)/*.tokens
