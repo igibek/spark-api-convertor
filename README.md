@@ -1,4 +1,16 @@
 # CSC512/495 Course Project: Spark API Converter
+## Get start
+The package includes everything to build the project.
+
+1. You need to export CLASSPATH variable. You can do it by running `source classpath.sh`.
+2. Build the program using `make` command
+3. To run the program type: `java spark.App <absolute_path_to_file> <api>`.
+
+### Examples:
+
+1. Run a program for a **tests/dataset_1.t** file `java spark.App tests/dataset_1.t dataset`
+2. Run a program for a **tests/dataframe_1.t** file `java spark.App tests/dataframe_1.t dataframe`
+
 ## Overview
 Spark is a popular analytics engine for large-scale data processing. It supports various types of tasks, including generic data analysis, machine learning, stream computing, and graph computing. This project involves three different kinds of Spark APIs that all target generic data analysis. They are RDD API, Dataset API, and Dataframe API respectively. RDD API is the most expressive one. Dataset API is less expressive than RDD API but it enjoys better performance in most cases, thanks to its compact intermediate data representation. Dataframe API is a subset of Dataset API, and it is the least expressive one. But Dataframe API could achieve the best performance in general because it can exploit the highly optimized Spark SQL. For more details, please refer to the blog: A Tale of Three Apache Spark APIs: RDDs, DataFrames, and Datasets.
 
