@@ -112,7 +112,7 @@ public class CustomDatasetListener extends DatasetBaseListener {
 				result += ".select(reduceAggregator(" + getArgs(ctx.getText()) + ")).collect()";
 				break;
 			case (".reduceByKey("):
-				result += ".groupByKey(_._1).agg(reduceByKeyAggregator(<func>" + getArgs(ctx.getText()) + "))";
+				result += ".groupByKey(_._1).agg(reduceByKeyAggregator(" + getArgs(ctx.getText()) + "))";
 				break;
 			case (".sortBy("):
 				result += ".map(row=>((" + getArgs(ctx.getText()) + ")(row), row)).orderBy(\"_1\").map(_._2)";

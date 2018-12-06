@@ -4,29 +4,24 @@ grammar Dataset;
     package spark.dataset;
 }
 
-prog  : start //EOF
-      //| IDENTIFIER WS* '=' WS* start WS* more* WS* EOF
-      //| start WS* EOF
+prog  : start
       ;
 
 start : WS* 'sc' mod
       ;
 
-//more  : IDENTIFIER mod WS*
-//      ;
-
-mod  : '.range(' WS* NUMBER WS* ',' WS* NUMBER WS* ')' mod
-     | '.textFile(' WS* STRING WS* ')' mod
-     | '.map(' WS* func WS* ')' mod
-     | '.filter(' WS* func WS* ')' mod
-     | '.reduce(' WS* func WS* ')' mod
-     | '.reduceByKey(' WS* func WS* ')' mod
-     | '.sortBy(' WS* func WS* ')' mod
-     | '.collect(' WS* ')' mod
+mod  : '.range(' WS* NUMBER WS* ',' WS* NUMBER WS* ')' WS* mod
+     | '.textFile(' WS* STRING WS* ')' WS* mod
+     | '.map(' WS* func WS* ')' WS* mod
+     | '.filter(' WS* func WS* ')' WS* mod
+     | '.reduce(' WS* func WS* ')' WS* mod
+     | '.reduceByKey(' WS* func WS* ')' WS* mod
+     | '.sortBy(' WS* func WS* ')' WS* mod
+     | '.collect(' WS* ')' WS* mod
      | EOF
      ; 
 
-func : ((SYMBOL|IDENTIFIER|NUMBER)WS*)* WS* funcSym WS* ((SYMBOL|IDENTIFIER|NUMBER)WS*)*
+func : ((SYMBOL|IDENTIFIER|NUMBER|','|')'|'(')WS*)* WS* funcSym WS* ((SYMBOL|IDENTIFIER|NUMBER|','|')'|'(')WS*)*
      ;
 
 funcSym : '=>' 
@@ -38,7 +33,7 @@ fragment LETTER     : ([a-z]|[A-Z]|'_');
 fragment DIGIT      : [0-9];
 fragment SIGN       : ('-'|'+'|);
 NUMBER     : SIGN (([1-9] DIGIT* ) | '0');
-IDENTIFIER : LETTER(NUMBER|LETTER)*;
+IDENTIFIER : LETTER(DIGIT|LETTER)*;
 STRING     : '"' (NUMBER|LETTER)+ '"';
 CHAR       : '\'' (NUMBER|LETTER) '\'';
 SYMBOL     : '('|')'|'*'|'&'|'^'|'%'|'$'|'#'|'@'|'!'|'~'|'.'|','|'='|'+'|'-'|'/'|'?'|'<'|'>'|':';
