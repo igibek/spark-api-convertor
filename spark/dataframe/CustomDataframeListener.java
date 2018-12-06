@@ -37,7 +37,9 @@ public class CustomDataframeListener implements DataframeListener {
 			return ctx.NUMBER().getText();
 		} else if (ctx.op() != null) {
 			return transform(ctx.pure_expression(0)) + ctx.op().getText() + transform(ctx.pure_expression(1));
-		} 
+		} else if (ctx.getStart().getText().equals("(")) {
+			return "(" + transform(ctx.pure_expression(0)) +")";
+		}
 		return null;
 	}
 	private String transform(DataframeParser.Comp_expressionContext ctx) {
@@ -224,10 +226,7 @@ public class CustomDataframeListener implements DataframeListener {
 		
 		if (ctx.op() != null) {
 			System.out.println("> HAS OPERATION: " + ctx.getText());
-			pureExpression += ctx.op().getText() + transform(ctx.pure_expression(1));
-			if (ctx.pure_expression(0).identity() != null) {
-				pureExpression = transform(ctx.pure_expression(0)) + pureExpression;
-			}
+			pureExpression = transform(ctx.pure_expression(0)) + ctx.op().getText() + transform(ctx.pure_expression(1));
 		} else if(ctx.getStart().getText().equals("if")) {
 			pureExpression = "if(" 
 				+ transform(ctx.comp_expression())
@@ -237,15 +236,21 @@ public class CustomDataframeListener implements DataframeListener {
 				+ transform(ctx.pure_expression(1)) 
 				+ ")";
 		} else if (ctx.getStart().getText().equals("(")) {
-			pureExpression = "(" + pureExpression + ")";
-		} else if (ctx.identity() != null && ctx.identity().IDENTIFIER().size() == 1) {
-			System.out.println("> IDENTITY: " + ctx.identity().getText());
-			pureExpression += transform(ctx);
-		} else if (ctx.NUMBER() != null) {
-			pureExpression += transform(ctx);
-		}
+			
+			pureExpression = "(" + transform(ctx.pure_expression(0)) + ")";
+		} 
+		// else if (ctx.identity() != null && ctx.identity().IDENTIFIER().size() == 1) {
+		// 	System.out.println("> IDENTITY: " + ctx.identity().getText());
+		// 	pureExpression += transform(ctx);
+		// } else if (ctx.NUMBER() != null) {
+		// 	pureExpression += transform(ctx);
+		// }
 
 		if (ctx.getParent() instanceof DataframeParser.Tuple_expressionContext || ctx.getParent() instanceof DataframeParser.Simple_expressionContext) {
+			if (ctx.identity() != null) {
+				System.out.println("> IDENTITY: " + ctx.identity().getText());
+				pureExpression += transform(ctx);
+			}
 			System.out.println("> EXIT PURE: " + ctx.getText() + " --> " + pureExpression);
 			expressions.add(pureExpression);
 		}

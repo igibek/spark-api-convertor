@@ -61,20 +61,14 @@ comp              : '=='
                   | '<='
                   ;
 
-
-
-
-
-
-
-
 //Lexer Rules
 
 fragment LETTER     : ([a-z]|[A-Z]|'_');
 fragment DIGIT      : [0-9];
-fragment SIGN       : ('-'|'+'|);
+// fragment SIGN       : ('-'|'+'|);
+fragment SIGN       : (|);
 NUMBER     : SIGN ('0'|[1-9]DIGIT*);
-IDENTIFIER : LETTER(NUMBER|LETTER)*;
+IDENTIFIER : LETTER(DIGIT|LETTER)*;
 STRING     : '"' (NUMBER|LETTER)+ '"';
 CHAR       : '\'' (NUMBER|LETTER) '\'';
 SYMBOL     : '('|')'|'*'|'&'|'^'|'%'|'$'|'#'|'@'|'!'|'~'|'.'|','|'='|'+'|'-'|'/'|'?'|'<'|'>'|':';
