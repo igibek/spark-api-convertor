@@ -32,18 +32,23 @@ public class App {
         }
         
         try {
+            System.out.println("============\n> STARTED\n============");
+            System.out.println("-- Filename: " + args[0]);
+            System.out.println("-- Target api: " + api);
             String content = readFileAsString(args[0]);
             if (api.equals("dataframe")) {
                 transformed = transformToDataframe(content);
             } else {
                 transformed = transformToDataset(content);
             }
-            writeFile(args[0], transformed, args[1]);
+            String newFile = writeFile(args[0], transformed, args[1]);
+            System.out.println("-- Original content: " + content);
+            System.out.println("-- Final content: " + transformed);
+            System.out.println("-- New file: " + newFile);
+            System.out.println("============\n> FINISHED\n============");
         } catch (Exception ex) {
             System.out.println("Error: " + ex.getMessage());
         }
-
-        System.out.println("> FINISHED !!!\nFinal result:\n" + transformed);
     }
 
     /**
@@ -96,15 +101,15 @@ public class App {
     { 
         String data = ""; 
         data = new String(Files.readAllBytes(Paths.get(fileName))); 
-        System.out.println("Content of file: " + data);
         return data; 
     } 
     /**
     Private function to create and write the data to the file
      */
-    private static void writeFile(String filename, String data, String api) throws IOException {
+    private static String writeFile(String filename, String data, String api) throws IOException {
         filename += "_" + api;
         Files.write(Paths.get(filename), data.getBytes());
+        return filename;
     }
 
     /**
