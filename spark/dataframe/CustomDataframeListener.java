@@ -32,9 +32,9 @@ public class CustomDataframeListener implements DataframeListener {
 
 	private String transform(DataframeParser.Pure_expressionContext ctx) {
 		if (ctx.identity() != null) {
-			return map.get(ctx.getText());
+			return ctx.sign().getText() + map.get(ctx.identity().getText());
 		} else if (ctx.NUMBER() != null) {
-			return ctx.NUMBER().getText();
+			return ctx.sign().getText() + ctx.NUMBER().getText();
 		} else if (ctx.op() != null) {
 			return transform(ctx.pure_expression(0)) + ctx.op().getText() + transform(ctx.pure_expression(1));
 		} else if (ctx.getStart().getText().equals("(")) {
@@ -53,8 +53,8 @@ public class CustomDataframeListener implements DataframeListener {
 	@Override public void enterProgram(DataframeParser.ProgramContext ctx) { 
 		result = "spark.range(";
 		String args = "";
-		for(TerminalNode node: ctx.NUMBER()) {
-			args += node.getText() + ",";
+		for (int i = 0; i < ctx.NUMBER().size(); i++) {
+			args += ctx.sign(i).getText() + ctx.NUMBER(i).getText() + ",";
 		}
 		args = args.substring(0, args.length()-1);
 		result += args + ").selectExpr(\"id as _1\")";
@@ -353,4 +353,14 @@ public class CustomDataframeListener implements DataframeListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void visitErrorNode(ErrorNode node) { }
+	/**
+	 * Enter a parse tree produced by {@link DataframeParser#sign}.
+	 * @param ctx the parse tree
+	 */
+	@Override public void enterSign(DataframeParser.SignContext ctx) {}
+	/**
+	 * Exit a parse tree produced by {@link DataframeParser#sign}.
+	 * @param ctx the parse tree
+	 */
+	@Override public void exitSign(DataframeParser.SignContext ctx) {}
 }

@@ -4,7 +4,7 @@ grammar Dataframe;
 package spark.dataframe;
 }
 
-program  : 'sc.range(' NUMBER ',' NUMBER ')' WS* mapops* '.collect()' WS* EOF
+program  : 'sc.range(' sign NUMBER ',' sign NUMBER (',' sign NUMBER)? ')' WS* mapops* '.collect()' WS* EOF
          ;
 
 mapops   : '.map(' udf ')' WS*
@@ -35,8 +35,8 @@ assign_exprs       : assign_expr
 assign_expr        : 'val' WS* identity WS* '=' WS* pure_expression
                    ;
 
-pure_expression   : NUMBER
-                  | identity
+pure_expression   : sign NUMBER
+                  | sign identity
                   | '(' pure_expression ')'
                   | pure_expression WS* op WS* pure_expression
                   | 'if' WS* '(' comp_expression ')' WS* pure_expression ' else ' pure_expression
@@ -61,16 +61,22 @@ comp              : '=='
                   | '<='
                   ;
 
+sign              : '-'
+                  | '+'
+                  |
+                  ;
 //Lexer Rules
 
 fragment LETTER     : ([a-z]|[A-Z]|'_');
 fragment DIGIT      : [0-9];
-// fragment SIGN       : ('-'|'+'|);
-fragment SIGN       : (|);
-NUMBER     : SIGN ('0'|[1-9]DIGIT*);
+
+// fragment SIGN       : (|);
+NUMBER     : ('0'|[1-9]DIGIT*);
 IDENTIFIER : LETTER(DIGIT|LETTER)*;
 STRING     : '"' (NUMBER|LETTER)+ '"';
 CHAR       : '\'' (NUMBER|LETTER) '\'';
 SYMBOL     : '('|')'|'*'|'&'|'^'|'%'|'$'|'#'|'@'|'!'|'~'|'.'|','|'='|'+'|'-'|'/'|'?'|'<'|'>'|':';
 WS         : [ \t\r\n]+ -> skip
            ;
+// SIGN       : ('-'|'+')? -> skip
+//            ;
