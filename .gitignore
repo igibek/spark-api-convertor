@@ -3,3 +3,4 @@
 .antlr
 *.tokens
 *.interp
+*.zip
